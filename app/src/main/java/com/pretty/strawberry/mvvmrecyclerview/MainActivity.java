@@ -1,5 +1,6 @@
 package com.pretty.strawberry.mvvmrecyclerview;
 
+import android.app.ListActivity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
@@ -9,8 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pretty.strawberry.mvvmrecyclerview.adapter.RecyclerAdapter;
 import com.pretty.strawberry.mvvmrecyclerview.models.NicePlace;
@@ -18,6 +22,7 @@ import com.pretty.strawberry.mvvmrecyclerview.viewmodels.MainActivityViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         mFab = findViewById(R.id.fab);
         mRecyclerView = findViewById(R.id.recycler_view);
         mProgressBar =findViewById(R.id.progress_bar);
+
 
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
@@ -76,6 +82,40 @@ public class MainActivity extends AppCompatActivity {
                            ));
                    }
         });
+
+        // ItemTouchHelper allows you to easily determine the direction of an event.
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.START | ItemTouchHelper.END) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                Toast.makeText(MainActivity.this, "on Move", Toast.LENGTH_SHORT).show();
+                mAdapter.onItemMove(viewHolder.getAdapterPosition(),target.getAdapterPosition());
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                Toast.makeText(MainActivity.this, "on Swiped ", Toast.LENGTH_SHORT).show();
+                mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+
+            }
+
+            //in order to support starting drag events from a long press on a RecyclerView item
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return true;
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
+
 
         // Update the data in Adapter
         initRecyclerView();

@@ -12,14 +12,16 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import com.pretty.strawberry.mvvmrecyclerview.R;
+import com.pretty.strawberry.mvvmrecyclerview.interfaces.ItemTouchHelperAdapter;
 import com.pretty.strawberry.mvvmrecyclerview.models.NicePlace;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ItemTouchHelperAdapter {
 
 
     private List<NicePlace> mNicePlaces = new ArrayList<>();
@@ -65,6 +67,29 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mNicePlaces.size();
     }
 
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        if(fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mNicePlaces, i, i + 1);
+            }
+        } else {
+            for(int i = fromPosition; i > toPosition; i--)
+            {
+                Collections.swap(mNicePlaces,i,i-1);
+            }
+        }
+        notifyItemMoved(fromPosition,toPosition);
+        return true;
+
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        mNicePlaces.remove(position);
+        notifyItemRemoved(position);
+    }
+
 
     private class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -78,6 +103,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             mName = itemView.findViewById(R.id.image_name);
         }
     }
+
+
+
 
 
 }
